@@ -17,7 +17,7 @@ def readCommands():
   Read commandline arguments
   """
   p = argparse.ArgumentParser(description=("Converting multiple LVIS files to a raster"))
-  p.add_argument("--outres", dest ="outRes", type=int, default=200, help=("Output resolution (m)"))
+  p.add_argument("--outres", dest ="outRes", type=int, default=50, help=("Output resolution (m)"))
   p.add_argument("--output", dest ="outName", type=str, default='lvis_rast_it_out.tif', help=("Output filename"))
   p.add_argument("--inEPSG", dest ="inEPSG", type=int, default=4326, help=("Input projection"))
   p.add_argument("--outEPSG", dest ="outEPSG", type=int, default=3031, help=("Output projection"))
@@ -43,9 +43,9 @@ class handleTiff(object):
         '''
         Read a geotiff in to RAM
         '''
+        print("--Reading in raster--")
         # open a dataset object
         ds=gdal.Open(str(filename))
-        # could use gdal.Warp to reproject if wanted?
 
         # read data from geotiff object
         self.nX=ds.RasterXSize             # number of pixels in x direction
@@ -72,13 +72,15 @@ class handleTiff(object):
 
       self.fill = np.copy(self.data)
 
+      print("--Deploying search window of focal function--")
+
       for i in np.arange(window,cols-window): # search the data in the x dimension
           for j in np.arange(window,rows-window): # search the data in the y dimension
-                  surround_sum = np.nanmean(self.data[i-window:i+window+1,j-window:j+window+1])
-                  if np.isfinite(surround_sum) == True:
-                      self.fill[i][j] = surround_sum
-                  else:
-                      self.fill[i][j] = self.data[i][j] # check the sum of surrounding values
+                surround_sum = np.nanmean(self.data[i-window:i+window+1,j-window:j+window+1])
+                if np.isfinite(surround_sum) == True:
+                    self.fill[i][j] = surround_sum
+                else:
+                    self.fill[i][j] = self.data[i][j] # check the sum of surrounding values
 
     def writeFilledTiff(self,filename):
       """
@@ -104,7 +106,7 @@ if __name__=="__main__":
     start_time = time.time()
     cmd = readCommands()
     # set the directory
-    """
+
     dataDir = b'/geos/netdata/avtrain/data/3d/oosa/assignment/lvis/'+str(cmd.LVISyear)+'/'
     x0 = cmd.minX
     x1 = cmd.maxX
@@ -119,6 +121,7 @@ if __name__=="__main__":
 
     # loop through these files
     for h5 in h5s:
+        print("Processing file ", h5)
         # take these bounds with processing
         lvis = flightLine(filename=h5,minX=x0,minY=y0,maxX=x1,maxY=y1)
         # take checkpoint which is set upon reading the file
@@ -135,7 +138,7 @@ if __name__=="__main__":
             lvis.writeSingleTiff(filename=h5,res=cmd.outRes)
 
             # then start all over again!
-    """
+
     # directory holding the tifs processd above
     tifDir = r'./'+str(cmd.LVISyear)+'/'
     # output name

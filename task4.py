@@ -39,7 +39,9 @@ class ContourRast(changeDetection):
 
         for i in np.arange(0,self.reference.nY):
             for j in np.arange(0,self.reference.nX):
-                self.rounded[i][j] = interval*round(self.array_difference[i][j]/interval) # find its nearest-whole-multiple of the interval
+                if np.isnan(self.array_difference[i][j]) == False:
+                    self.rounded[i][j] = interval*round(self.array_difference[i][j]/interval) # find its nearest-whole-multiple of the interval
+                    print("Rounding raster value", self.array_difference[i][j], "to contour interval ", self.rounded[i][j])
 
         self.findEdge()
 
@@ -50,8 +52,11 @@ class ContourRast(changeDetection):
         """
         self.edge = np.copy(self.rounded)
 
+        print("--Finding the edge pixels--")
+
         for i in np.arange(1,self.reference.nY): # search the data in the x dimension
             for j in np.arange(1,self.reference.nX): # search the data in the y dimension
+                if np.isnan(self.rounded[i][j]) == False:
                     surround_mean = np.nanmean(self.rounded[i-1:i+2,j-1:j+2])
                     # if the mean of all pixels isn't the same as the centre pixel (must be an edge)
                     # if its the maximum of the edge then use it (contour interval upwards)
@@ -76,11 +81,12 @@ class ContourRast(changeDetection):
 
         for i in np.arange(1,self.reference.nY): # search the data in the x dimension
             for j in np.arange(1,self.reference.nX): # search the data in the y dimension
-                surround_max = np.nanmax(self.edge[i-1:i+2,j-1:j+2]) # find the maximum surrounding value
-                if self.edge[i][j] == surround_max: # if the value == maximum then it must be the upper contour
-                    self.cont[i][j] = self.edge[i][j] # so keep it
-                else:
-                    self.cont[i][j] = np.nan # otherwise clear the data point
+                if np.isnan(self.edge[i][j]) == False:
+                    surround_max = np.nanmax(self.edge[i-1:i+2,j-1:j+2]) # find the maximum surrounding value
+                    if self.edge[i][j] == surround_max: # if the value == maximum then it must be the upper contour
+                        self.cont[i][j] = self.edge[i][j] # so keep it
+                    else:
+                        self.cont[i][j] = np.nan # otherwise clear the data point
 
         self.findPosition()
 
@@ -117,6 +123,8 @@ class ContourRast(changeDetection):
             [1,1,1],
             [1,1,1]]
 
+        print("--Classifying unique contour lines--")
+
         for v in values: # find each unique value and its adjacent values
             labelled, num_features = label(self.cont == v, structure=s)
             # label each unique combination of touching unique values
@@ -140,6 +148,7 @@ class ContourRast(changeDetection):
             for i in np.arange(1,self.reference.nY): # search the data in the x dimension
                 for j in np.arange(1,self.reference.nX): # search the data in the y dimension
                     if self.result[i][j] == k:
+                        print("Extracting contour ID ",k)
                         # Separate grouped results according to their id (k)(and thus elevation value)
                         lon_list.append(float(self.cont_lon[i][j]))
                         lat_list.append(float(self.cont_lat[i][j]))
@@ -190,7 +199,7 @@ if __name__=="__main__":
 
     out.writeMultistring() # writing out a shapefile of the contours
     out.writeTiff(array_to_write=out.cont,filename=cmd.outfile)
-    out.writeTiff(array_to_write=out.rounded,filename="./results/contours_classed.tif") # writing out a raster of the contours
+    out.writeTiff(array_to_write=out.rounded,filename=r'./results/contours_classed.tif') # writing out a raster of the contours
 
     print("--- %s seconds ---" % (time.time() - start_time))
 

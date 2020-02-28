@@ -4,6 +4,7 @@ from task2 import handleTiff
 import numpy as np
 import ogr, os, osr
 import matplotlib.pyplot as plt
+import time
 
 """
 Wider extent values:
@@ -32,7 +33,7 @@ class clipTiff(object):
     def __init__(self,filename,minX,minY,maxX,maxY):
         self.warpRaster(filename,minX,minY,maxX,maxY)
 
-    def warpRaster(self,filename,minX,minY,maxX,maxY):
+    def warpRaster(self,filename,minX,minY,maxX,maxY,res=50):
         """
             Function using gdal.Warp to reproject a raster
             into a particular spatial extent for the EPSG:3031 projection
@@ -40,7 +41,8 @@ class clipTiff(object):
         ds = gdal.Open(str(filename))
         self.out_filename = filename[:-4] + str("_clipped.tif") # creating output name
         try:
-            ds = gdal.Warp(str(self.out_filename), filename, dstSRS='EPSG:3031', outputBounds=(minX,minY,maxX,maxY))
+            print("--Standardizing--")
+            ds = gdal.Warp(str(self.out_filename), filename, xRes=res, yRes=-res, dstSRS='EPSG:3031', outputBounds=(minX,minY,maxX,maxY))
             ds = None
         except:
             print("Sorry your bounds choices were invalid") # checking user chose valid bounds
@@ -87,24 +89,23 @@ class changeDetection(object):
             # set up new array
             self.vol_change_per_cell = np.copy(self.array_difference)
 
+            print("--Calculating volume change--")
             # loop through extent
             for i in np.arange(0,self.reference.nY-1):
                 for j in np.arange(0,self.reference.nX)-1:
-                    # calculate volumn change per cell
-                    self.vol_change_per_cell[i][j] = self.array_difference[i][j] * self.cellsize
+                    if np.isnan(self.array_difference[i][j]) == False:
+                        # calculate volumn change per cell
+                        self.vol_change_per_cell[i][j] = self.array_difference[i][j] * self.cellsize
 
             # total change (sum of all cells)
             self.total_vol_change = np.nansum(self.vol_change_per_cell.flat)
 
-        # calculate total volumn per cell in each year
-        array2.vol_per_cell = array2.data *  self.cellsize
-        array2.total_vol = np.nansum(array2.vol_per_cell.flat)
+            # calculate total volumn per cell in each year
+            array2.vol_per_cell = array2.data *  self.cellsize
+            array2.total_vol = np.nansum(array2.vol_per_cell.flat)
 
-        array1.vol_per_cell = array1.data *  self.cellsize
-        array1.total_vol = np.nansum(array1.vol_per_cell.flat)
-
-        return array1.total_vol, array2.total_vol
-
+            array1.vol_per_cell = array1.data *  self.cellsize
+            array1.total_vol = np.nansum(array1.vol_per_cell.flat)
 
     def writeTiff(self,array_to_write,filename):
           """
@@ -133,8 +134,8 @@ if __name__=="__main__":
     cmd = readCommands()
 
     # Two files being prepared for computation (standardisation prior to processing)
-    clip_file_1 = clipTiff(filename=r'./2009/LVIS_dem_filled_200m.tif',minX=cmd.minX,minY=cmd.minY,maxX=cmd.maxX,maxY=cmd.maxY)
-    clip_file_2 = clipTiff(filename=r'./2015/LVIS_dem_filled_200m.tif',minX=cmd.minX,minY=cmd.minY,maxX=cmd.maxX,maxY=cmd.maxY)
+    clip_file_1 = clipTiff(filename=r'./2009/2009_LVIS_dem_filled_200m.tif',minX=cmd.minX,minY=cmd.minY,maxX=cmd.maxX,maxY=cmd.maxY)
+    clip_file_2 = clipTiff(filename=r'./2015/2015_LVIS_dem_filled_200m.tif',minX=cmd.minX,minY=cmd.minY,maxX=cmd.maxX,maxY=cmd.maxY)
 
     # Reading out the clipped raster arrays
     array_1 = handleTiff(filename=str(clip_file_1.out_filename),readTiff=True)
@@ -142,10 +143,10 @@ if __name__=="__main__":
 
     # Reading these back in for calculations
     output = changeDetection(array_1,array_2)
-    arr1_vol, arr2_vol = output.volumnCalc(array_1,array_2)
+    output.volumnCalc(array_1,array_2)
 
     # Write out the raster of change detection
-    output.writeTiff(array_to_write=output.array_difference,filename="'./results/elevation_change_output.tif")
+    output.writeTiff(array_to_write=output.array_difference,filename=r'./results/elevation_change_output.tif')
 
     print("--- %s seconds ---" % (time.time() - start_time))
 
