@@ -18,10 +18,6 @@ def readCommands():
   Read commandline arguments
   """
   p = argparse.ArgumentParser(description=("Elevation change between two rasters"))
-  p.add_argument("--outres", dest ="outRes", type=int, default=30, help=("Output resolution (m)"))
-  p.add_argument("--output", dest ="outName", type=str, default='lvis_rast_it_out.tif', help=("Output filename"))
-  p.add_argument("--inEPSG", dest ="inEPSG", type=int, default=4326, help=("Input projection"))
-  p.add_argument("--outEPSG", dest ="outEPSG", type=int, default=3031, help=("Output projection"))
   p.add_argument("--minX", dest ="minX", type=int, default=-2207050, help=("Minimum X bound"))
   p.add_argument("--maxX", dest ="maxX", type=int, default=-1002275, help=("Maximum X bound"))
   p.add_argument("--minY", dest ="minY", type=int, default=-501171, help=("Minimum Y Bound"))

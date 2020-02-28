@@ -178,8 +178,8 @@ if __name__=="__main__":
     cmd = readCommands()
 
     # Load the two filled DEMs (2009 and 2015) for clipping
-    clip_file_1 = clipTiff(filename=r'./2009_LVIS_dem_window_15_filled_200m.tif',minX=cmd.minX,minY=cmd.minY,maxX=cmd.maxX,maxY=cmd.maxY)
-    clip_file_2 = clipTiff(filename=r'./2015_LVIS_dem_window_85_filled_200m.tif',minX=cmd.minX,minY=cmd.minY,maxX=cmd.maxX,maxY=cmd.maxY)
+    clip_file_1 = clipTiff(filename=r'./2009/2009_LVIS_dem_filled_200m.tif',minX=cmd.minX,minY=cmd.minY,maxX=cmd.maxX,maxY=cmd.maxY)
+    clip_file_2 = clipTiff(filename=r'./2015/2015_LVIS_dem_filled_200m.tif',minX=cmd.minX,minY=cmd.minY,maxX=cmd.maxX,maxY=cmd.maxY)
 
     # Read out the clipped arrays
     array_1 = handleTiff(filename=str(clip_file_1.out_filename),readTiff=True)
@@ -190,7 +190,7 @@ if __name__=="__main__":
 
     out.writeMultistring() # writing out a shapefile of the contours
     out.writeTiff(array_to_write=out.cont,filename=cmd.outfile)
-    out.writeTiff(array_to_write=out.result,filename="./results/contours_classed.tif") # writing out a raster of the contours
+    out.writeTiff(array_to_write=out.rounded,filename="./results/contours_classed.tif") # writing out a raster of the contours
 
     print("--- %s seconds ---" % (time.time() - start_time))
 

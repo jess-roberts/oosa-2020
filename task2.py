@@ -17,13 +17,13 @@ def readCommands():
   Read commandline arguments
   """
   p = argparse.ArgumentParser(description=("Converting multiple LVIS files to a raster"))
-  p.add_argument("--outres", dest ="outRes", type=int, default=50, help=("Output resolution (m)"))
+  p.add_argument("--outres", dest ="outRes", type=int, default=200, help=("Output resolution (m)"))
   p.add_argument("--output", dest ="outName", type=str, default='lvis_rast_it_out.tif', help=("Output filename"))
   p.add_argument("--inEPSG", dest ="inEPSG", type=int, default=4326, help=("Input projection"))
   p.add_argument("--outEPSG", dest ="outEPSG", type=int, default=3031, help=("Output projection"))
   p.add_argument("--minX", dest ="minX", type=int, default=250, help=("Minimum X bound"))
   p.add_argument("--maxX", dest ="maxX", type=int, default=290, help=("Maximum X bound"))
-  p.add_argument("--minY", dest ="minY", type=int, default=-100, help=("Minimum Y Bound"))
+  p.add_argument("--minY", dest ="minY", type=int, default=-90, help=("Minimum Y Bound"))
   p.add_argument("--maxY", dest ="maxY", type=int, default=-80, help=("Maximum Y bound"))
   p.add_argument("--year", dest ="LVISyear", type=int, default=2009, help=("Year of LVIS survey"))
   cmdargs = p.parse_args()
@@ -104,6 +104,7 @@ if __name__=="__main__":
     start_time = time.time()
     cmd = readCommands()
     # set the directory
+    """
     dataDir = b'/geos/netdata/avtrain/data/3d/oosa/assignment/lvis/'+str(cmd.LVISyear)+'/'
     x0 = cmd.minX
     x1 = cmd.maxX
@@ -134,11 +135,11 @@ if __name__=="__main__":
             lvis.writeSingleTiff(filename=h5,res=cmd.outRes)
 
             # then start all over again!
-
+    """
     # directory holding the tifs processd above
-    tifDir = r'/web/s1434165/public_html/cgi-bin/oosa/assignment_2020/src/'+str(cmd.LVISyear)+'/'
+    tifDir = r'./'+str(cmd.LVISyear)+'/'
     # output name
-    out_tif = r'/web/s1434165/public_html/cgi-bin/oosa/assignment_2020/src/'+str(cmd.LVISyear)+'/'+str(cmd.LVISyear)+'_LVIS_merged_200m.tif'
+    out_tif = r'./'+str(cmd.LVISyear)+'/'+str(cmd.LVISyear)+'_LVIS_merged_200m.tif'
 
     # criteria to find the geotiffs
     search_criteria = '*.tif'

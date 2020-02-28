@@ -95,6 +95,7 @@ class lvisGround(lvisData):
 
     # loop over waves
     for i in range(0,self.nWaves):
+      print("Denoising wave ",i,"of ",self.nWaves)
 
       # subtract mean background noise
       self.denoised[i]=self.waves[i]-self.meanNoise[i]
