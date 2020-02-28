@@ -73,7 +73,7 @@ This algorithm starts by taking the target array (for contouring) and reclassing
 
 Next, these array values identified as contours need to be grouped according to the line they form (as not all values of '10m' in the array will comprise part of the same contour line). For this, `ContourRast.groupConts()` identifies all the unique values it must search for, within a defined search structure (to include diagonal connections) and labels to separate groups of unique values accordingly. The actual position of these 'contour points' of the array must also be found. This is done in `ContourRast.findPosition()` which takes the origin of the array, its resolution and the contour points' relative position (index) to calculate its longitude and latitude in real space.
 
-The penultimate function `ContourRast.groupFeatures()` creates a list, wherein each item of the list is a dictionary grouping the unique ID of the contour line (from `ContourRast.groupConts()`), the latitude and longitude of all the points in that line (from `ContourRast.findPosition()`) and the line's elevation value (originally from `ContourRast.roundCont()`).
+The penultimate function `ContourRast.groupFeatures()` creates a list, wherein each item of the list is a dictionary grouping the unique ID of the contour line (from `ContourRast.groupConts()`), the latitude and longitude of all the points in that line (from `ContourRast.findPosition()`) and the line's elevation value (originally from `ContourRast.roundCont()`). The outputs of this script is a rasterized contour geotiff and a .png of a plot of the contour points.
 
 The following command line arguments are available:
 
@@ -88,3 +88,4 @@ Example usage: `python3 task4.py --interval 25 --minX -2207050 --maxX -1002275 -
 
 *Note: the default CRS here is EPSG:3031*
 
+The final function `ContourRast.writeMultiString()` does not currently work, but represents an ideal development whereby the the contour points are translated to a multi-polyline shapefile for use in program such as ArcGIS and QGIS.  
